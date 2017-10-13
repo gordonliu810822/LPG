@@ -1,0 +1,14 @@
+Package: LPG
+Type: Package
+Title: Fit a four-group probabilistic model to leveraging pleiotropy in GWAS
+Version: 1.0
+Date: 2016-9-9
+Author: Yang Yi and Jin Liu
+Maintainer: Yang Yi <yygaosansiban@sina.com>
+Description: This package provides functions for fitting a four-group probabilistic model to leveraging pleiotropy in genome-wide association studies
+License: GPL (>= 2)
+Imports: Rcpp (>= 0.12.7)
+LinkingTo: Rcpp, RcppArmadillo
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

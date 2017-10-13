@@ -1,0 +1,182 @@
+---
+title: "LPG Packages: Implement a four-group probabilistic approach to leveraging pleiotropy in genome-wide association studies"
+author: "Yi Yang^1^, Mingwei Dai^2,4^ Jian Huang^3^ Xinyi Lin^5^ Can Yang^4^ Jin Liu^5^* Min Chen^1^*"
+date: "`r Sys.Date()`"
+output: pdf_document
+vignette: >
+  %\VignetteIndexEntry{LPG}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+^1^School of Statistics and Management, The Shanghai University of Finance and Economics, Shanghai  
+^2^Institute for Information and System Sciences, Xian Jiaotong University, Xian  
+^3^Department of Applied Mathematics, Hong Kong Polytechnics University  
+^4^Department of Mathematics, Hong Kong University of Science and Technology  
+^5^Centre for Quantitative Medicine, Duke-NUS Medical School  
+
+
+## Overview
+The vignette provides an introduction to R package `LPG` . The `LPG` package provdes functions to analyze pleiotropic effects among GWAS data sets and than make inference about pleiotropy.
+
+install the packages  
+```{r, eval=FALSE, echo=TRUE}
+install.packages("devtools")  
+library(devtools)  
+install_github("Shufeyangyi2015310117/LPG")  
+```
+
+load the package 
+```{r, eval=TRUE, echo=TRUE}
+library(LPG)
+```
+
+## Data introduction
+There are two classes of data that LPG can analyze. The first is ordinary matrix often used in usual linear regression, The other is plink file often used in GWAS study.
+
+## Fitting the LPG with matrix data
+There is simulation data in the package, we can load it using the command
+```{r, eval=TRUE, echo=TRUE}
+data(simulation)  
+```
+
+we can get two n-by-p deisgn matrix X, X2, two n-by-1 phenotype y, y2 and two n-by
+-q covariates matrix z, z2.
+
+We can fit different model with following commands. In addition, we can set the opts to satisfiy our demand.  
+Fit Ftp for separate analysis with quantitative phenotype  
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5)   
+fit<-Lpg(X, y, opts = opts)
+```
+
+Fit Ftp for separate analysis with binary phenotype  
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5)  
+fit<-Lpg(X, y, family = "binomial", opts = opts)
+```
+
+Fit Ftp for joint analysis with quantitative phenotype
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5, constraintalpha = 0)  
+fit<-Lpg(X, y, x2 = X2, y2 = y2, opts = opts)
+```
+
+Fit Ftp for joint analysis with binary phenotype
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5, constraintalpha = 0)  
+fit<-Lpg(X, y, x2 = X2, y2 = y2, family = "binomial", opts = opts)
+```
+
+If we want to add covariates in Ftp, we can do as the following commmand.  
+Separate analysis 
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5)   
+fit<-Lpg(X, y, z=z, family = "binomial", opts = opts)  
+```
+
+Joint analysis  
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5, constraintalpha = 0)   
+fit<-Lpg(X, y, z = z, x2 = X2, y2 = y2, z2 = z2, family = "binomial", opts = opts)
+```
+
+If we want to fit Ftp with alpha controlled. we set the logic paramter constraintalpha equal to 1.
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5, constraintalpha = 1)    
+fit<-Lpg(X, y, z = z, x2 = X2, y2 = y2, z2 = z2, family = "binomial", opts = opts)  
+```
+
+The result of fit is a list contains model parameters and varaitional parameters.
+In general, it has following components.
+```{r, eval=TRUE, echo=TRUE}
+str(fit)
+```
+
+
+## Fitting the LPG with plink file  
+If we have two plink file BDqc37 and BDqc36 placed in the directory "D:/realdata/WTCCC_all", we can fit Ftp with the following commmand.  
+Separate analysis for quantitative phenotype
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5)  
+fit <- Lpg.Plink("D:/realdata/WTCCC_all/BDqc37", opts = opts)  
+```
+
+Separate analysis for binary phenotype  
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5)  
+fit <- Lpg.Plink("D:/realdata/WTCCC_all/BDqc37", family = "binomial", opts = opts)  
+```
+
+Joint analysis for quantitative phenotype  
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5, constraintalpha = 0)  
+fit <- Lpg.Plink("D:/realdata/WTCCC_all/BDqc37",file2 = "D:/realdata/WTCCC_all/BDqc36", opts = opts)  
+```
+
+Joint analysis for binary phenotype  
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5, constraintalpha = 0)  
+fit <- Lpg.Plink("D:/realdata/WTCCC_all/BDqc37", file2 =
+                   "D:/realdata/WTCCC_all/BDqc36", family = "binomial", opts = opts)  
+```
+
+Separate analysis for binary phenotype with covariates  
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5)  
+fit <- Lpg.Plink("D:/realdata/WTCCC_all/BDqc37", z, family = "binomial", opts = opts)  
+```
+
+Joint analysis for binary phenotype with covariates  
+```{r, eval=FALSE, echo=TRUE, tidy = FALSE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5, constraintalpha = 0)  
+fit <- Lpg.Plink("D:/realdata/WTCCC_all/BDqc37", z = z, file2 =
+                   "D:/realdata/WTCCC_all/BDqc36", z2 = z2, family = "binomial", opts = opts)  
+```
+
+## Get matrix data from plink file 
+If we we want to read a plink file to check it's content. We can read the plink file as following. 
+```{r, eval=FALSE, echo=TRUE}
+data <- Read.Plink("D:/realdata/WTCCC_all/BDqc37")  
+```
+The object data is a list consisting of two conponents, genotype matrix "X" and phenotype "Y".
+```{r, eval=TRUE, echo=TRUE}
+str(data) 
+```
+
+## Statistical inference and Pleiotropy test 
+
+Association mapping 
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5, constraintalpha = 0)  
+fit<-Lpg(X, y, x2 = X2, y2 = y2, family = "binomial", opts = opts)
+```
+
+Risk SNPs
+```{r, eval=TRUE, echo=TRUE}
+riskmat<-assoc(fit, FDR = 0.2, fdrControl="global")
+```
+
+struct of risk SNP matrix
+```{r, eval=TRUE, echo=TRUE}
+str(riskmat)
+```
+
+Estimate under null hypothesis and alternative hypothesis
+```{r, eval=FALSE, echo=TRUE}
+opts = list(max_iter = 1e5, dispF = 1, display_gap = 20, epsStopLogLik = 1e-5, constraintalpha = 1)  
+fit0<-Lpg(X, y, x2 = X2, y2 = y2, family = "binomial", opts = opts)
+```
+
+Pleiotropy test
+```{r, eval=TRUE, echo=TRUE}
+out<-Pleiotropy.test(fit0,fit)
+```
+
+a list consists of LRT statistics and p-value
+```{r, eval=TRUE, echo=TRUE}
+str(out)
+```
+
+
+## Reference 
+LPG: a four-group probabilistic approach to leveraging pleiotropy in genome-wide association studies
